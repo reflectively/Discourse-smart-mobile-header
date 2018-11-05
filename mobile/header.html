@@ -1,37 +1,142 @@
 <script type="text/discourse-plugin" version="0.8">
-  // headroom.js
-  // https://github.com/WickyNilliams/headroom.js
-  // 1.6kb gzip
-  // Version: 0.9.4
-  // Author: WickyNilliams
-  // Licence: MIT https://github.com/WickyNilliams/headroom.js/blob/master/LICENSE
-  !function(a,b){"use strict";"function"==typeof define&&define.amd?define([],b):"object"==typeof exports?module.exports=b():a.Headroom=b()}(this,function(){"use strict";function a(a){this.callback=a,this.ticking=!1}function b(a){return a&&"undefined"!=typeof window&&(a===window||a.nodeType)}function c(a){if(arguments.length<=0)throw new Error("Missing arguments in extend function");var d,e,f=a||{};for(e=1;e<arguments.length;e++){var g=arguments[e]||{};for(d in g)"object"!=typeof f[d]||b(f[d])?f[d]=f[d]||g[d]:f[d]=c(f[d],g[d])}return f}function d(a){return a===Object(a)?a:{down:a,up:a}}function e(a,b){b=c(b,e.options),this.lastKnownScrollY=0,this.elem=a,this.tolerance=d(b.tolerance),this.classes=b.classes,this.offset=b.offset,this.scroller=b.scroller,this.initialised=!1,this.onPin=b.onPin,this.onUnpin=b.onUnpin,this.onTop=b.onTop,this.onNotTop=b.onNotTop,this.onBottom=b.onBottom,this.onNotBottom=b.onNotBottom}var f={bind:!!function(){}.bind,classList:"classList"in document.documentElement,rAF:!!(window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame)};return window.requestAnimationFrame=window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame,a.prototype={constructor:a,update:function(){this.callback&&this.callback(),this.ticking=!1},requestTick:function(){this.ticking||(requestAnimationFrame(this.rafCallback||(this.rafCallback=this.update.bind(this))),this.ticking=!0)},handleEvent:function(){this.requestTick()}},e.prototype={constructor:e,init:function(){if(e.cutsTheMustard)return this.debouncer=new a(this.update.bind(this)),this.elem.classList.add(this.classes.initial),setTimeout(this.attachEvent.bind(this),100),this},destroy:function(){var a=this.classes;this.initialised=!1;for(var b in a)a.hasOwnProperty(b)&&this.elem.classList.remove(a[b]);this.scroller.removeEventListener("scroll",this.debouncer,!1)},attachEvent:function(){this.initialised||(this.lastKnownScrollY=this.getScrollY(),this.initialised=!0,this.scroller.addEventListener("scroll",this.debouncer,!1),this.debouncer.handleEvent())},unpin:function(){var a=this.elem.classList,b=this.classes;!a.contains(b.pinned)&&a.contains(b.unpinned)||(a.add(b.unpinned),a.remove(b.pinned),this.onUnpin&&this.onUnpin.call(this))},pin:function(){var a=this.elem.classList,b=this.classes;a.contains(b.unpinned)&&(a.remove(b.unpinned),a.add(b.pinned),this.onPin&&this.onPin.call(this))},top:function(){var a=this.elem.classList,b=this.classes;a.contains(b.top)||(a.add(b.top),a.remove(b.notTop),this.onTop&&this.onTop.call(this))},notTop:function(){var a=this.elem.classList,b=this.classes;a.contains(b.notTop)||(a.add(b.notTop),a.remove(b.top),this.onNotTop&&this.onNotTop.call(this))},bottom:function(){var a=this.elem.classList,b=this.classes;a.contains(b.bottom)||(a.add(b.bottom),a.remove(b.notBottom),this.onBottom&&this.onBottom.call(this))},notBottom:function(){var a=this.elem.classList,b=this.classes;a.contains(b.notBottom)||(a.add(b.notBottom),a.remove(b.bottom),this.onNotBottom&&this.onNotBottom.call(this))},getScrollY:function(){return void 0!==this.scroller.pageYOffset?this.scroller.pageYOffset:void 0!==this.scroller.scrollTop?this.scroller.scrollTop:(document.documentElement||document.body.parentNode||document.body).scrollTop},getViewportHeight:function(){return window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight},getElementPhysicalHeight:function(a){return Math.max(a.offsetHeight,a.clientHeight)},getScrollerPhysicalHeight:function(){return this.scroller===window||this.scroller===document.body?this.getViewportHeight():this.getElementPhysicalHeight(this.scroller)},getDocumentHeight:function(){var a=document.body,b=document.documentElement;return Math.max(a.scrollHeight,b.scrollHeight,a.offsetHeight,b.offsetHeight,a.clientHeight,b.clientHeight)},getElementHeight:function(a){return Math.max(a.scrollHeight,a.offsetHeight,a.clientHeight)},getScrollerHeight:function(){return this.scroller===window||this.scroller===document.body?this.getDocumentHeight():this.getElementHeight(this.scroller)},isOutOfBounds:function(a){var b=a<0,c=a+this.getScrollerPhysicalHeight()>this.getScrollerHeight();return b||c},toleranceExceeded:function(a,b){return Math.abs(a-this.lastKnownScrollY)>=this.tolerance[b]},shouldUnpin:function(a,b){var c=a>this.lastKnownScrollY,d=a>=this.offset;return c&&d&&b},shouldPin:function(a,b){var c=a<this.lastKnownScrollY,d=a<=this.offset;return c&&b||d},update:function(){var a=this.getScrollY(),b=a>this.lastKnownScrollY?"down":"up",c=this.toleranceExceeded(a,b);this.isOutOfBounds(a)||(a<=this.offset?this.top():this.notTop(),a+this.getViewportHeight()>=this.getScrollerHeight()?this.bottom():this.notBottom(),this.shouldUnpin(a,c)?this.unpin():this.shouldPin(a,c)&&this.pin(),this.lastKnownScrollY=a)}},e.options={tolerance:{up:0,down:0},offset:0,scroller:window,classes:{pinned:"headroom--pinned",unpinned:"headroom--unpinned",top:"headroom--top",notTop:"headroom--not-top",bottom:"headroom--bottom",notBottom:"headroom--not-bottom",initial:"headroom"}},e.cutsTheMustard="undefined"!=typeof f&&f.rAF&&f.bind&&f.classList,e});
-</script>
+let topicProgress = require("discourse/components/topic-progress").default,
+  h = require("virtual-dom").h,
+  appEvents = api.container.lookup("app-events:main"),
+  topicRoute = api.container.lookup("route:topic"),
+  topicController = api.container.lookup("controller:topic"),
+  header,
+  scrollDirection;
 
-<script type="text/discourse-plugin" version="0.8">
-const TopicRoute = require("discourse/routes/topic").default;
+function scrollGuard() {
+  if (scrollDirection === "up") {
+    topic = topicController.get("model");
+    appEvents.trigger("header:show-topic", topic);
+  } else if (scrollDirection === "down") {
+    appEvents.trigger("header:hide-topic");
+  }
+}
 
-let elem, headroom;
-
-TopicRoute.reopen({
+topicRoute.reopen({
   activate: function() {
     this._super();
     Em.run.next(function() {
-      elem = document.querySelector("header");
-      headroom = new Headroom(elem, {
-        offset: 75,
-        tolerance: 5,
-        classes: {
-          pinned: "slideDown",
-          unpinned: "slideUp"
-        }
+      header = $(".d-header");
+      lastScroll = 0;
+      scrollDirection = null;
+
+      api.onAppEvent("header:show-topic", () => {
+        header.removeClass("slideDown").addClass("slideUp");
       });
-      headroom.init();
+
+      api.onAppEvent("header:hide-topic", () => {
+        header.removeClass("slideUp").addClass("slideDown");
+      });
+
+      api.onAppEvent("topic:scrolled", offset => {
+        delta = offset - lastScroll;
+        if (offset < 0) return;
+        if (delta > 2 && scrollDirection != "up" && offset > 60) {
+          scrollDirection = "up";
+          scrollGuard(scrollDirection);
+        } else if (delta < -2 && scrollDirection != "down") {
+          scrollDirection = "down";
+          scrollGuard(scrollDirection);
+        }
+
+        lastScroll = offset;
+      });
     });
   },
+
   deactivate: function() {
     this._super();
-    headroom.destroy();
+    header.removeClass("slideUp slideDown");
+  }
+});
+
+topicProgress.reopen({
+  _dock() {
+    const $wrapper = this.$();
+    if (!$wrapper || $wrapper.length === 0) return;
+
+    const offset = window.pageYOffset || $("html").scrollTop(),
+      progressHeight = this.site.mobileView ? 0 : $("#topic-progress").height(),
+      maximumOffset = $("#topic-bottom").offset().top + progressHeight,
+      windowHeight = $(window).height(),
+      bodyHeight = $("body").height(),
+      composerHeight = $("#reply-control").height() || 0,
+      isDocked = offset >= maximumOffset - windowHeight + composerHeight,
+      bottom = bodyHeight - maximumOffset;
+
+    if (composerHeight > 0) {
+      $wrapper.css("bottom", isDocked ? bottom : composerHeight);
+    } else {
+      $wrapper.css("bottom", isDocked ? bottom : "");
+    }
+
+    this.set("docked", isDocked);
+
+    const $replyArea = $("#reply-control .reply-area");
+    if ($replyArea && $replyArea.length > 0) {
+      $wrapper.css("right", `${$replyArea.offset().left}px`);
+    } else {
+      $wrapper.css("right", "1em");
+    }
+
+    const isIOS = this.capabilities.isIOS;
+    const switchHeight = bodyHeight - offset - windowHeight;
+
+    if (isIOS && switchHeight < -5) {
+      // match elastic-scroll behaviour in iOS
+      setTimeout(function() {
+        appEvents.trigger("header:hide-topic");
+      }, 300);
+    } else if (!isIOS && switchHeight < 5) {
+      // normal swith for everyone else
+      setTimeout(function() {
+        appEvents.trigger("header:hide-topic");
+      }, 300);
+    }
+  }
+});
+
+api.reopenWidget("home-logo", {
+  logo() {
+    const { siteSettings } = this,
+      mobileView = this.site.mobileView,
+      mobileLogoUrl = siteSettings.mobile_logo_url || "",
+      showMobileLogo = mobileView && mobileLogoUrl.length > 0,
+      logoSmallUrl = siteSettings.logo_small_url || "",
+      logoUrl = siteSettings.logo_url || "",
+      title = siteSettings.title;
+
+    if (this.attrs.minimized) {
+      if (logoSmallUrl.length) {
+        return h("img#site-logo.logo-small", {
+          key: "logo-small",
+          attributes: {
+            src: Discourse.getURL(logoSmallUrl),
+            width: 35,
+            height: 35,
+            alt: title
+          }
+        });
+      } else {
+        return iconNode("home");
+      }
+    } else if (showMobileLogo) {
+      return h("img#site-logo.logo-big", {
+        key: "logo-mobile",
+        attributes: { src: Discourse.getURL(mobileLogoUrl), alt: title }
+      });
+    } else if (logoUrl.length) {
+      return h("img#site-logo.logo-big", {
+        key: "logo-big",
+        attributes: { src: Discourse.getURL(logoUrl), alt: title }
+      });
+    } else {
+      return h("h1#site-text-logo.text-logo", { key: "logo-text" }, title);
+    }
   }
 });
 </script>
