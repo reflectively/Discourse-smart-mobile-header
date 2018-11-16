@@ -1,6 +1,7 @@
 <script type="text/discourse-plugin" version="0.8">
 let topicProgress = require("discourse/components/topic-progress").default,
   h = require("virtual-dom").h,
+  { iconNode } = require("discourse-common/lib/icon-library"),
   appEvents = api.container.lookup("app-events:main"),
   topicRoute = api.container.lookup("route:topic"),
   topicController = api.container.lookup("controller:topic"),
@@ -106,8 +107,8 @@ api.reopenWidget("home-logo", {
       mobileView = this.site.mobileView,
       mobileLogoUrl = siteSettings.mobile_logo_url || "",
       showMobileLogo = mobileView && mobileLogoUrl.length > 0,
-      logoSmallUrl = siteSettings.logo_small_url || "",
-      logoUrl = siteSettings.logo_url || "",
+      logoSmallUrl = siteSettings.site_logo_small_url || "",
+      logoUrl = siteSettings.site_logo_url || "",
       title = siteSettings.title;
 
     if (this.attrs.minimized) {
