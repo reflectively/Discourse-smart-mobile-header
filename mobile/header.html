@@ -105,7 +105,7 @@ api.reopenWidget("home-logo", {
   logo() {
     const { siteSettings } = this,
       mobileView = this.site.mobileView,
-      mobileLogoUrl = siteSettings.mobile_logo_url || "",
+      mobileLogoUrl = siteSettings.site_mobile_logo_url || "",
       showMobileLogo = mobileView && mobileLogoUrl.length > 0,
       logoSmallUrl = siteSettings.site_logo_small_url || "",
       logoUrl = siteSettings.site_logo_url || "",
